@@ -1,0 +1,16 @@
+[Unit]
+Description=Web Application Service
+After=network.target mysql.service
+
+[Service]
+ExecStart=/usr/bin/node /opt/webapp/server.js
+Restart=always
+User=serviceuser
+Group=servicegroup
+EnvironmentFile=/opt/webapp/.env
+WorkingDirectory=/opt/webapp
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

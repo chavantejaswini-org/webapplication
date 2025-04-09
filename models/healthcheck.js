@@ -1,25 +1,29 @@
 module.exports = (sequelize, DataTypes) => {
-    const HealthStatus = sequelize.define(
-      "HealthChecks",
+    const HealthCheck = sequelize.define(
+      "HealthCheck",
       {
-        id: {
+        // Primary key: auto-incrementing integer ID for each health check entry
+        checkId: {
           type: DataTypes.INTEGER,
           primaryKey: true,
           autoIncrement: true,
-          field: "CheckId",  
+          field: "check_id",
         },
-        timestamp: {
+  
+        // Timestamp of when the health check was recorded
+        datetime: {
           type: DataTypes.DATE,
           allowNull: false,
           defaultValue: DataTypes.NOW,
-          field: "DateTime",
+          field: "datetime",
         },
       },
       {
-        tableName: "HealthChecks",
-        timestamps: false,
+        tableName: "health_check", // Name of the database table
+        timestamps: false,         // Disable Sequelize's default timestamp fields
       }
     );
   
-    return HealthStatus;
+    return HealthCheck;
   };
+  

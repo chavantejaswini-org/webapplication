@@ -1,45 +1,31 @@
-/*const { Sequelize } = require("sequelize");
-const config = require("../config/config.js");
-const environment = process.env.NODE_ENV || "development";
- 
-const sequelizeInstance = new Sequelize(config[environment].url, config[environment]);
- 
-const database = {
-  sequelizeInstance,
-  Sequelize,
-  HealthStatus: require("./healthcheck")(sequelizeInstance, Sequelize),
-};
- 
-module.exports = database;*/
-
 const { Sequelize } = require("sequelize");
 const config = require("../config/config.js");
-const environment = process.env.NODE_ENV || "development";
-const healthcheckModel = require("./healthcheck");
 
-// Use database.js configuration approach
-const sequelizeInstance = new Sequelize(
-  process.env.DB_NAME,
-  process.env.DB_USER,
-  process.env.DB_PASSWORD,
-  {
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT,
-    dialect: "mysql",
-    logging: false,
-    dialectOptions: {
-      authPlugins: {
-        mysql_clear_password: () => () =>
-          Buffer.from(process.env.DB_PASSWORD + "\0"),
-      },
-    },
-  }
-);
+// Determine the environment (default to development)
+const env = process.env.NODE_ENV || "development";
 
-const database = {
-  sequelizeInstance,
-  Sequelize,
-  HealthStatus: healthcheckModel(sequelizeInstance, Sequelize),
+// Ensure a valid configuration exists for the current environment
+if (!config[env]) {
+  throw new Error(`Database configuration invalid : ${env}`);
+}
+
+// Destructure DB config values
+const { username, password, database, host, port, dialect } = config[env];
+
+// Initialize Sequelize instance with connection parameters
+const sequelize = new Sequelize(database, username, password, {
+  host,
+  port,
+  dialect,
+  logging: false, // Disable SQL logging for cleaner output
+});
+
+// Load models and attach to `db` object
+const db = {
+  sequelize, // Sequelize instance
+  Sequelize, // Sequelize library reference
+  HealthCheck: require("./healthcheck")(sequelize, Sequelize), // HealthCheck model
+  File: require("./file")(sequelize, Sequelize),               // File model
 };
 
-module.exports = database;
+module.exports = db;
